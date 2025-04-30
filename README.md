@@ -1,30 +1,22 @@
-# 🚀 MinIO no Render.com
+# 🚀 MinIO no Render.com (Web Service Docker)
 
-Este projeto contém a configuração necessária para executar uma instância do [MinIO](https://min.io/) — um serviço de armazenamento compatível com S3 — como um serviço web permanente no [Render.com](https://render.com), usando Docker e Deploy via Blueprint (`render.yaml`).
-
----
-
-## 📦 O que está incluído
-
-- `Dockerfile`: Usa a imagem oficial do MinIO
-- `render.yaml`: Define o serviço no Render com variáveis de ambiente
-- Suporte a:
-  - Console Web (porta `9001`)
-  - API S3 (porta `9000`)
+Este projeto executa o MinIO (armazenamento compatível com S3) como um **serviço web Docker** no Render.com, com acesso ao **console web pela URL pública**.
 
 ---
 
-## 🔧 Pré-requisitos
+## 🧩 Como funciona
 
-- Conta no [Render.com](https://render.com)
-- Conta no [GitHub](https://github.com)
-- Git instalado localmente
+- Render só permite **uma porta pública** por Web Service
+- Este setup inverte as portas do MinIO:
+  - `9000` → Console Web (exposto publicamente)
+  - `9001` → API S3 (acessível apenas internamente)
+- Isso garante que você possa acessar o painel web do MinIO no navegador.
 
 ---
 
-## 🚀 Como fazer o deploy
+## 📦 Como usar
 
-### 1. Clone este repositório ou crie o seu
+### 1. Suba este repositório no GitHub
 
 ```bash
 git clone https://github.com/seu-usuario/minio-render.git

@@ -7,8 +7,9 @@ services:
     envVars:
       - key: MINIO_ROOT_USER
       - key: MINIO_ROOT_PASSWORD
-    ports:
-      - port: 9000
-        name: s3
-      - port: 9001
-        name: console
+      - key: HOST
+        value: "0.0.0.0"
+      - key: s3
+        value: 9000
+      - key: console
+        value: 9090

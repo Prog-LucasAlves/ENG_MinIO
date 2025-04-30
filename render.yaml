@@ -6,7 +6,9 @@ services:
     autoDeploy: false
     envVars:
       - key: MINIO_ROOT_USER
+        value:
       - key: MINIO_ROOT_PASSWORD
+        value:
       - key: HOST
         value: "0.0.0.0"
       - key: s3

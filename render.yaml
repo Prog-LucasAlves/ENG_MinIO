@@ -1,7 +1,26 @@
 services:
-  - type: web
-    name: flask-service
+  - name: minio-service
+    type: web
     env: docker
     plan: free
-    dockerfilePath: ./Dockerfile
+    dockerfilePath: ./minio/Dockerfile.minio
     autoDeploy: true
+    envVars:
+      - key: MINIO_ACCESS_KEY
+        value: admin
+      - key: MINIO_SECRET_KEY
+        value: admin123
+
+  - name: flask-service
+    type: web
+    env: docker
+    plan: free
+    dockerfilePath: ./flask/Dockerfile
+    autoDeploy: true
+    envVars:
+      - key: MINIO_ENDPOINT
+        value: http://minio-service:9000
+      - key: MINIO_ACCESS_KEY
+        value: admin
+      - key: MINIO_SECRET_KEY
+        value: admin123

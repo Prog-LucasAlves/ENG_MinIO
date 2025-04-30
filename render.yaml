@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: minio-server
+    env: docker
+    plan: starter
+    autoDeploy: false
+    envVars:
+      - key: MINIO_ROOT_USER
+      - key: MINIO_ROOT_PASSWORD
+    ports:
+      - port: 9000
+        name: s3
+      - port: 9001
+        name: console

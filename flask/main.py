@@ -12,7 +12,7 @@ app = Flask(__name__)
 DEFAULT_BUCKETS = ["gold", "silver", "bronze"]
 
 # Variáveis de ambiente
-API_TOKEN = os.getenv("API_TOKEN", "dev-token")  # padrão seguro para testes locais
+API_TOKEN = os.getenv("API_TOKEN")  # padrão seguro para testes locais
 
 # Cliente S3 (MinIO)
 s3 = boto3.client(

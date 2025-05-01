@@ -1,80 +1,5 @@
-"""
 import os
-
-import boto3
-
-from flask import Flask, jsonify, request
-
-app = Flask(__name__)
-
-s3 = boto3.client(
-    "s3",
-    endpoint_url=os.getenv("MINIO_ENDPOINT"),
-    aws_access_key_id=os.getenv("MINIO_ACCESS_KEY"),
-    aws_secret_access_key=os.getenv("MINIO_SECRET_KEY"),
-    region_name="us-east-1",
-)
-BUCKET = "test-bucket"
-
-# Garante que o bucket exista
-try:
-    buckets = [b["Name"] for b in s3.list_buckets().get("Buckets", [])]
-    if BUCKET not in buckets:
-        s3.create_bucket(Bucket=BUCKET)
-        print(f"Bucket '{BUCKET}' criado com sucesso.")
-except Exception as e:
-    print(f"Erro ao verificar/criar bucket: {e}")
-
-
-@app.route("/")
-def home():
-    return "Flask + MinIO está rodando!"
-
-
-@app.route("/upload", methods=["POST"])
-def upload():
-    file = request.files.get("file")
-    if not file:
-        return "No file", 400
-    s3.upload_fileobj(file, BUCKET, file.filename)
-    return "Uploaded"
-
-
-@app.route("/list")
-def list_files():
-    try:
-        contents = s3.list_objects_v2(Bucket=BUCKET).get("Contents", [])
-        keys = [obj["Key"] for obj in contents]
-        if not keys:
-            return jsonify(message="Bucket vazio")
-        return jsonify(keys)
-    except Exception as e:
-        return jsonify(error=str(e)), 500
-
-
-@app.route("/minio-status")
-def minio_status():
-    try:
-        names = [b["Name"] for b in s3.list_buckets().get("Buckets", [])]
-        return jsonify(status="OK", buckets=names)
-    except Exception as e:
-        return jsonify(status="ERRO", error=str(e)), 500
-
-
-@app.route("/upload-teste")
-def upload_teste():
-    try:
-        s3.put_object(Bucket=BUCKET, Key="teste.txt", Body=b"Teste via endpoint")
-        return "Teste enviado"
-    except Exception as e:
-        return jsonify(error=str(e)), 500
-
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
-"""
-
-import os
+from functools import wraps
 
 import boto3
 from botocore.exceptions import ClientError
@@ -86,7 +11,10 @@ app = Flask(__name__)
 # Buckets padrão
 DEFAULT_BUCKETS = ["gold", "silver", "bronze"]
 
-# Cliente S3
+# Variáveis de ambiente
+API_TOKEN = os.getenv("API_TOKEN", "dev-token")  # padrão seguro para testes locais
+
+# Cliente S3 (MinIO)
 s3 = boto3.client(
     "s3",
     endpoint_url=os.getenv("MINIO_ENDPOINT"),
@@ -96,7 +24,19 @@ s3 = boto3.client(
 )
 
 
-# Criar os buckets se não existirem
+# Middleware de autenticação
+def require_auth(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = request.headers.get("Authorization")
+        if token != f"Bearer {API_TOKEN}":
+            return jsonify(error="Não autorizado"), 401
+        return f(*args, **kwargs)
+
+    return decorated
+
+
+# Criar buckets padrão, se necessário
 def ensure_buckets():
     try:
         existing = [b["Name"] for b in s3.list_buckets().get("Buckets", [])]
@@ -144,16 +84,34 @@ def list_files(bucket):
         return jsonify(error=str(e)), 500
 
 
+@app.route("/bucket/<bucket_name>/empty", methods=["DELETE"])
+@require_auth
+def empty_bucket(bucket_name):
+    if bucket_name not in DEFAULT_BUCKETS:
+        return jsonify(error="Bucket inválido ou não autorizado"), 400
+    try:
+        contents = s3.list_objects_v2(Bucket=bucket_name).get("Contents", [])
+        if not contents:
+            return jsonify(message="Bucket já está vazio")
+
+        objects_to_delete = [{"Key": obj["Key"]} for obj in contents]
+        s3.delete_objects(Bucket=bucket_name, Delete={"Objects": objects_to_delete})
+        return jsonify(
+            message=f"Todos os arquivos do bucket '{bucket_name}' foram deletados."
+        )
+    except Exception as e:
+        return jsonify(error=str(e)), 500
+
+
 @app.route("/bucket/<bucket_name>", methods=["DELETE"])
+@require_auth
 def delete_bucket(bucket_name):
     if bucket_name not in DEFAULT_BUCKETS:
         return jsonify(error="Bucket inválido ou não autorizado"), 400
     try:
-        # Verifica se está vazio
         contents = s3.list_objects_v2(Bucket=bucket_name).get("Contents", [])
         if contents:
             return jsonify(error="Bucket não está vazio"), 400
-
         s3.delete_bucket(Bucket=bucket_name)
         return jsonify(message=f"Bucket '{bucket_name}' deletado com sucesso")
     except ClientError as e:

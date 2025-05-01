@@ -30,15 +30,6 @@ def home():
     return "Flask + MinIO está rodando!"
 
 
-@app.route("/force-create-bucket")
-def force_create_bucket():
-    try:
-        s3.create_bucket(Bucket=BUCKET)
-        return f"Bucket '{BUCKET}' criado manualmente"
-    except Exception as e:
-        return jsonify(error=str(e)), 500
-
-
 @app.route("/upload", methods=["POST"])
 def upload():
     file = request.files.get("file")

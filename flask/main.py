@@ -84,7 +84,7 @@ from flask import Flask, jsonify, request
 app = Flask(__name__)
 
 # Buckets padrão
-DEFAULT_BUCKETS = ["ouro", "prata", "bronze"]
+DEFAULT_BUCKETS = ["gold", "silver", "bronze"]
 
 # Cliente S3
 s3 = boto3.client(
@@ -141,6 +141,22 @@ def list_files(bucket):
             return jsonify(message="Bucket vazio")
         return jsonify([obj["Key"] for obj in contents])
     except Exception as e:
+        return jsonify(error=str(e)), 500
+
+
+@app.route("/bucket/<bucket_name>", methods=["DELETE"])
+def delete_bucket(bucket_name):
+    if bucket_name not in DEFAULT_BUCKETS:
+        return jsonify(error="Bucket inválido ou não autorizado"), 400
+    try:
+        # Verifica se está vazio
+        contents = s3.list_objects_v2(Bucket=bucket_name).get("Contents", [])
+        if contents:
+            return jsonify(error="Bucket não está vazio"), 400
+
+        s3.delete_bucket(Bucket=bucket_name)
+        return jsonify(message=f"Bucket '{bucket_name}' deletado com sucesso")
+    except ClientError as e:
         return jsonify(error=str(e)), 500
 
 

@@ -10,9 +10,9 @@ from airflow import DAG
 def listar_arquivos_do_bucket():
     s3 = boto3.client(
         "s3",
-        endpoint_url=os.getenv("MINIO_ENDPOINT", "http://minio-service:9000"),
-        aws_access_key_id=os.getenv("MINIO_ACCESS_KEY", "admin"),
-        aws_secret_access_key=os.getenv("MINIO_SECRET_KEY", "admin123"),
+        endpoint_url=os.getenv("MINIO_ENDPOINT"),
+        aws_access_key_id=os.getenv("MINIO_ACCESS_KEY"),
+        aws_secret_access_key=os.getenv("MINIO_SECRET_KEY"),
         region_name="us-east-1",
     )
 

@@ -1,23 +1,44 @@
-# 🚀 MinIO no Render.com (Web Service Docker)
+# 🚀 Flask + MinIO API
 
-Este projeto executa o MinIO (armazenamento compatível com S3) como um **serviço web Docker** no Render.com, com acesso ao **console web pela URL pública**.
-
----
-
-## 🧩 Como funciona
-
-- Render só permite **uma porta pública** por Web Service
-- Este setup inverte as portas do MinIO:
-  - `9000` → Console Web (exposto publicamente)
-  - `9001` → API S3 (acessível apenas internamente)
-- Isso garante que você possa acessar o painel web do MinIO no navegador.
+Este projeto é uma API REST desenvolvida com **Flask** para interagir com o **MinIO** (compatível com S3), oferecendo endpoints para upload, listagem, esvaziamento e exclusão de buckets com segurança.
 
 ---
 
-## 📦 Como usar
+## ✅ Recursos
 
-### 1. Suba este repositório no GitHub
+- Conexão com MinIO via Boto3
+- Buckets padrão: `gold`, `silver`, `bronze`
+- Upload e listagem de arquivos por bucket
+- Esvaziamento de bucket
+- Exclusão de bucket (com validação)
+- Autenticação por token para ações críticas
+- Pronto para deploy no [Render](https://render.com)
 
-```bash
-git clone https://github.com/seu-usuario/minio-render.git
-cd minio-render
+---
+
+## 📦 Endpoints
+
+### Básicos
+
+- `GET /` → Verifica se o serviço está online
+- `GET /minio-status` → Retorna status do MinIO e buckets disponíveis
+
+### Arquivos
+
+- `POST /upload/<bucket>` → Upload de arquivo para um bucket
+- `GET /list/<bucket>` → Lista arquivos de um bucket
+
+### Buckets
+
+- `DELETE /bucket/<bucket>/empty` → Esvazia o bucket (**requer autenticação**)
+- `DELETE /bucket/<bucket>` → Remove o bucket se estiver vazio (**requer autenticação**)
+
+---
+
+## 🔐 Autenticação
+
+As rotas de **esvaziar** e **deletar** bucket exigem um token JWT no header:
+
+```http
+Authorization: Bearer SEU_TOKEN_AQUI
+```

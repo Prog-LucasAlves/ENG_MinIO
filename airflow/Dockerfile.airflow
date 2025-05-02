@@ -1,17 +1,12 @@
-FROM apache/airflow:2.9.1-python3.11
+# airflow/Dockerfile
+FROM apache/airflow:2.9.1-python3.10
 
-# Instala dependências extras se necessário
-USER root
-RUN apt-get update && apt-get install -y vim curl
+# Instala dependências
+RUN pip install boto3
 
-# Retorna ao usuário airflow
-USER airflow
+# Copia DAGs e entrypoint
+COPY dags/ /opt/airflow/dags/
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
-# Copia DAGs e plugins
-COPY dags /opt/airflow/dags
-
-# Define variáveis de ambiente padrão
-ENV AIRFLOW__CORE__LOAD_EXAMPLES=False
-
-# Inicializa DB e sobe os componentes
-ENTRYPOINT ["/bin/bash", "-c", "airflow db upgrade && airflow users create --username admin --firstname Admin --lastname User --role Admin --email admin@example.com --password admin && airflow scheduler & airflow webserver"]
+ENTRYPOINT ["/entrypoint.sh"]

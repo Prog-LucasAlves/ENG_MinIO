@@ -53,7 +53,19 @@ ensure_buckets()
 
 @app.route("/")
 def home():
-    return "Flask + MinIO rodando com buckets padrão!"
+    return jsonify(
+        {
+            "message": "API Flask + MinIO",
+            "endpoints": {
+                "Upload arquivo": "POST /upload/<bucket>",
+                "Listar arquivos": "GET /list/<bucket>",
+                "Status do MinIO": "GET /minio-status",
+                "Deletar bucket": "DELETE /bucket/<bucket_name>",
+                "Esvaziar bucket": "DELETE /bucket/<bucket_name>/empty",
+            },
+            "buckets padrão": ["gold", "silver", "bronze"],
+        }
+    )
 
 
 @app.route("/upload/<bucket>", methods=["POST"])

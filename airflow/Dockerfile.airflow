@@ -1,12 +1,12 @@
-# airflow/Dockerfile
 FROM apache/airflow:2.9.1-python3.10
 
 # Instala dependências
 RUN pip install boto3
 
-# Copia DAGs e entrypoint
+# Copia os DAGs e o script de entrada
 COPY dags/ /opt/airflow/dags/
-COPY entrypoint.sh /entrypoint.sh
+
+# Dá permissão de execução
 RUN chmod +x /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]

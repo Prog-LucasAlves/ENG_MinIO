@@ -9,7 +9,6 @@ USER airflow
 
 # Copia DAGs e plugins
 COPY dags /opt/airflow/dags
-COPY plugins /opt/airflow/plugins
 
 # Define variáveis de ambiente padrão
 ENV AIRFLOW__CORE__LOAD_EXAMPLES=False

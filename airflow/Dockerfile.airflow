@@ -13,4 +13,6 @@ RUN chown -R airflow: /opt/airflow
 USER airflow
 
 # Inicializa o banco e inicia o webserver
-CMD ["bash", "-c", "airflow db init && airflow webserver"]
+ENV AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=sqlite:////opt/airflow/airflow.db
+
+CMD ["airflow", "webserver"]

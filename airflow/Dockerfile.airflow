@@ -1,12 +1,9 @@
-FROM apache/airflow:2.9.1-python3.10
+FROM apache/airflow:2.9.1
 
-# Instala dependências
-RUN pip install boto3
+# Instalar dependências adicionais se quiser (exemplo)
+# RUN pip install boto3 flask
 
-# Copia os DAGs e o script de entrada
-COPY dags/ /opt/airflow/dags/
-
-# Dá permissão de execução
+COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]

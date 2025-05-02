@@ -1,10 +1,16 @@
-FROM apache/airflow:2.9.1
+FROM apache/airflow:2.9.1-python3.10
 
+# Copia DAGs (opcional, se você tiver DAGs locais)
+COPY ./dags /opt/airflow/dags
+
+# Define o usuário como root temporariamente (se precisar instalar algo)
 USER root
 
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+# Ajuste de permissões (se necessário)
+RUN chown -R airflow: /opt/airflow
 
+# Retorna ao usuário airflow
 USER airflow
 
-ENTRYPOINT ["/entrypoint.sh"]
+# Inicializa o banco e inicia o webserver
+CMD ["bash", "-c", "airflow db init && airflow webserver"]

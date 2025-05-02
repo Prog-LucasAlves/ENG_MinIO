@@ -1,19 +1,17 @@
 #!/bin/bash
+set -e
 
-# Inicializa o banco de dados
-airflow db init
+# Inicializa o banco de dados se não estiver pronto
+airflow db check || airflow db init
 
-# Cria o usuário admin (somente na primeira vez)
+# Cria o usuário admin (apenas se não existir)
 airflow users create \
-    --username admin \
-    --firstname Admin \
-    --lastname User \
-    --role Admin \
-    --email admin@example.com \
-    --password admin || true
+  --username admin \
+  --firstname Admin \
+  --lastname User \
+  --role Admin \
+  --email admin@example.com \
+  --password admin || true
 
-# Inicia o scheduler em background
-airflow scheduler &
-
-# Inicia o webserver (porta 8080)
+# Inicia o webserver
 exec airflow webserver
